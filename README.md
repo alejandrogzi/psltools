@@ -26,7 +26,7 @@
 
   <p align="center">
     <samp>
-        <span>work with .chain files in Rust</span>
+        <span>work with .psl files in Rust</span>
         <br>
         <br>
         <a href="https://docs.rs/psltools/0.0.1/psltools/">docs</a> .
