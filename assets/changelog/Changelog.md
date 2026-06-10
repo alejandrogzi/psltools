@@ -4,7 +4,7 @@ All notable changes to `psltools` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
-## [0.0.1] — unreleased
+## [0.0.1] — 2026-06-10
 
 Initial release.
 
