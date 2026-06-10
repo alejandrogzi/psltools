@@ -1,18 +1,6 @@
 <p align="center">
   <p align="center">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="200" height="200">
-  <!-- Cross connector -->
-  <rect x="65" y="52" width="30" height="16" rx="3" fill="#A86599"/>
-  <rect x="65" y="92" width="30" height="16" rx="3" fill="#6E65A8"/>
-
-  <!-- Left link -->
-  <rect x="30" y="40" width="40" height="80" rx="6" fill="none" stroke="#A86599" stroke-width="12"/>
-  <rect x="30" y="30" width="40" height="20" rx="4" fill="#A86599"/>
-
-  <!-- Right link -->
-  <rect x="90" y="40" width="40" height="80" rx="6" fill="none" stroke="#6E65A8" stroke-width="12"/>
-  <rect x="90" y="110" width="40" height="20" rx="4" fill="#6E65A8"/>
-  </svg>
+    <img alt="psltools logo" src="assets/logo/logo.svg" width="200" height="200">
   </p>
 
   <span>
