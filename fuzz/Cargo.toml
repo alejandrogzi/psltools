@@ -1,0 +1,29 @@
+[package]
+name = "psltools-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.psltools]
+path = ".."
+default-features = false
+features = ["mmap", "parallel"]
+
+[[bin]]
+name = "parse_psl"
+path = "fuzz_targets/parse_psl.rs"
+test = false
+doc = false
+bench = false
+
+[profile.release]
+debug = 1
+
+# Keep this crate out of the parent build.
+[workspace]

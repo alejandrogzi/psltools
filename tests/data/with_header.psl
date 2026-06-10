@@ -1,0 +1,6 @@
+psLayout version 3
+
+match	mis-	rep.	N%s	Q gap	Q gap	T gap	T gap	strand	Q	Q	Q	Q	T	T	T	T	block	blockSizes	qStarts	tStarts
+     	match	match		count	bases	count	bases		name	size	start	end	name	size	start	end	count
+-----
+10	0	0	0	0	0	0	0	+	q1	20	0	10	chr1	100	5	15	1	10,	0,	5,
