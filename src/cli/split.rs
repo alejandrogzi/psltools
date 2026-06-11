@@ -3,13 +3,15 @@
 
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::{self, BufRead, BufWriter, Write};
+use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::PathBuf;
 
 use clap::{Args, ValueEnum};
 use psltools::{OwnedPsl, StreamingReader, write_psl};
 
 use super::{CliError, OUTPUT_BUFFER_CAPACITY, ensure_gzip_available, ensure_inputs_exist};
+
+const COPY_BUFFER_CAPACITY: usize = 1024 * 1024;
 
 /// Split a PSL by sequence name.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
@@ -25,17 +27,28 @@ pub struct SplitArgs {
         short = 'c',
         long = "psl",
         value_name = "PATH",
-        help = "Input .psl (default stdin)."
+        help = "Input .psl file(s). If omitted, read from standard input.",
+        value_delimiter = ' ',
+        num_args = 1..,
     )]
-    input: Option<PathBuf>,
+    inputs: Option<Vec<PathBuf>>,
+
+    #[arg(
+        short = 'f',
+        long = "file",
+        value_name = "PATH",
+        conflicts_with = "inputs",
+        help = "Path to a file listing one input PSL path per line."
+    )]
+    file: Option<PathBuf>,
 
     #[arg(
         short = 'p',
         long = "out-prefix",
         value_name = "PREFIX",
-        help = "Output filename prefix; outputs are PREFIX.<key>.psl."
+        help = "Output filename prefix; outputs are PREFIX.<key>.psl. If omitted, outputs are <key>.psl."
     )]
-    out_prefix: String,
+    out_prefix: Option<String>,
 
     #[arg(short = 'G', long = "gzip", help = "Compress each output with gzip.")]
     gzip: bool,
@@ -138,23 +151,62 @@ where
     E: Write,
 {
     ensure_gzip_available(args.gzip)?;
-    if let Some(path) = &args.input {
-        ensure_inputs_exist(&[path.as_path()])?;
-    }
+    let inputs = collect_input_paths(&args)?;
+    let input_refs: Vec<&std::path::Path> = inputs.iter().map(PathBuf::as_path).collect();
+    ensure_inputs_exist(&input_refs)?;
     validate_mode(&args)?;
 
     let mut splitter = Splitter::new(&args);
-    if let Some(path) = &args.input {
-        let mut reader = StreamingReader::from_path(path)?;
-        splitter.run(&mut reader)?;
-    } else {
+    if inputs.is_empty() {
         let mut reader = StreamingReader::new(stdin);
         splitter.run(&mut reader)?;
+    } else {
+        for input in &inputs {
+            let mut reader = StreamingReader::from_path(input)?;
+            splitter.run(&mut reader)?;
+        }
     }
     let (records, files) = splitter.finish()?;
 
     super::log_summary("split", &[("records", records), ("files", files)]);
     Ok(())
+}
+
+/// Collects input PSL file paths from --psl or from a file listing paths.
+fn collect_input_paths(args: &SplitArgs) -> Result<Vec<PathBuf>, CliError> {
+    if let Some(paths) = &args.inputs {
+        return Ok(paths.clone());
+    }
+
+    let Some(list_path) = &args.file else {
+        return Ok(Vec::new());
+    };
+    let file = File::open(list_path)?;
+    let mut reader = BufReader::with_capacity(COPY_BUFFER_CAPACITY, file);
+    let mut line = String::new();
+    let mut paths = Vec::new();
+
+    loop {
+        line.clear();
+        let read = reader.read_line(&mut line)?;
+        if read == 0 {
+            break;
+        }
+        let trimmed = line.trim_end_matches(['\n', '\r']);
+        if trimmed.trim().is_empty() {
+            continue;
+        }
+        paths.push(PathBuf::from(trimmed.trim()));
+    }
+
+    if paths.is_empty() {
+        return Err(CliError::Message(format!(
+            "{} does not list any input PSL files",
+            list_path.display()
+        )));
+    }
+
+    Ok(paths)
 }
 
 fn validate_mode(args: &SplitArgs) -> Result<(), CliError> {
@@ -263,12 +315,18 @@ impl<'a> Splitter<'a> {
     fn path_for_key(&self, key: &[u8]) -> String {
         let name = String::from_utf8_lossy(key).replace(['/', '\\'], "_");
         let suffix = if self.args.gzip { ".psl.gz" } else { ".psl" };
-        format!("{}.{name}{suffix}", self.args.out_prefix)
+        match &self.args.out_prefix {
+            Some(prefix) => format!("{prefix}.{name}{suffix}"),
+            None => format!("{name}{suffix}"),
+        }
     }
 
     fn path_for_index(&self, idx: usize) -> String {
         let suffix = if self.args.gzip { ".psl.gz" } else { ".psl" };
-        format!("{}.{idx:04}{suffix}", self.args.out_prefix)
+        match &self.args.out_prefix {
+            Some(prefix) => format!("{prefix}.{idx:04}{suffix}"),
+            None => format!("{idx:04}{suffix}"),
+        }
     }
 
     fn finish(self) -> Result<(u64, u64), CliError> {
