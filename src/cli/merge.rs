@@ -113,11 +113,11 @@ where
         }
         let mut dedup = DedupState::new(args.dedup);
         match args.sorted_by {
-            Some(key) if args.inputs.is_some() => {
+            Some(key) if !inputs.is_empty() => {
                 written += kway_merge(&inputs, key.criterion(), &mut w, &mut dedup)?;
             }
             _ => {
-                if args.inputs.is_none() {
+                if inputs.is_empty() {
                     let mut reader = StreamingReader::new(stdin);
                     written += concat(&mut reader, &mut w, &mut dedup)?;
                 } else {
