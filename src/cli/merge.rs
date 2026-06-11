@@ -3,7 +3,8 @@
 
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
-use std::io::{BufRead, Write};
+use std::fs::File;
+use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use clap::{Args, ValueEnum};
@@ -11,6 +12,8 @@ use psltools::{OwnedPsl, StreamingReader, write_psl, write_psl_header};
 
 use super::sort_core::{SortCriterion, compare_records};
 use super::{CliError, emit_record, ensure_inputs_exist, write_output};
+
+const COPY_BUFFER_CAPACITY: usize = 1024 * 1024;
 
 /// The key on which inputs are already sorted (enables a streaming k-way merge).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
@@ -43,7 +46,17 @@ pub struct MergeArgs {
         value_delimiter = ' ',
         num_args = 1..,
     )]
-    inputs: Vec<PathBuf>,
+    inputs: Option<Vec<PathBuf>>,
+
+    #[arg(
+        short = 'f',
+        long = "file",
+        value_name = "PATH",
+        conflicts_with = "inputs",
+        required_unless_present = "inputs",
+        help = "Path to a file listing one input chain path per line"
+    )]
+    file: Option<PathBuf>,
 
     #[arg(
         short = 'o',
@@ -88,7 +101,9 @@ where
     W: Write,
     E: Write,
 {
-    let input_refs: Vec<&std::path::Path> = args.inputs.iter().map(PathBuf::as_path).collect();
+    // let input_refs: Vec<&std::path::Path> = args.inputs.iter().map(PathBuf::as_path).collect();
+    let inputs = collect_input_paths(&args)?;
+    let input_refs: Vec<&std::path::Path> = inputs.iter().map(PathBuf::as_path).collect();
     ensure_inputs_exist(&input_refs)?;
 
     let mut written = 0u64;
@@ -98,15 +113,15 @@ where
         }
         let mut dedup = DedupState::new(args.dedup);
         match args.sorted_by {
-            Some(key) if !args.inputs.is_empty() => {
-                written += kway_merge(&args.inputs, key.criterion(), &mut w, &mut dedup)?;
+            Some(key) if args.inputs.is_some() => {
+                written += kway_merge(&inputs, key.criterion(), &mut w, &mut dedup)?;
             }
             _ => {
-                if args.inputs.is_empty() {
+                if args.inputs.is_none() {
                     let mut reader = StreamingReader::new(stdin);
                     written += concat(&mut reader, &mut w, &mut dedup)?;
                 } else {
-                    for input in &args.inputs {
+                    for input in &inputs {
                         let mut reader = StreamingReader::from_path(input)?;
                         written += concat(&mut reader, &mut w, &mut dedup)?;
                     }
@@ -118,6 +133,54 @@ where
 
     super::log_summary("merge", &[("written", written)]);
     Ok(())
+}
+
+/// Collects input chain file paths from arguments.
+///
+/// Reads paths from --psl directly or from a file listing paths.
+///
+/// # Arguments
+///
+/// * `args` - Merge command arguments
+///
+/// # Output
+///
+/// Returns `Ok(Vec<PathBuf>)` with input paths or `Err(CliError)` on failure
+fn collect_input_paths(args: &MergeArgs) -> Result<Vec<PathBuf>, CliError> {
+    if let Some(paths) = &args.inputs {
+        return Ok(paths.clone());
+    }
+
+    let list_path = args
+        .file
+        .as_ref()
+        .expect("clap enforces either --psl or --file");
+    let file = File::open(list_path)?;
+    let mut reader = BufReader::with_capacity(COPY_BUFFER_CAPACITY, file);
+    let mut line = String::new();
+    let mut paths = Vec::new();
+
+    loop {
+        line.clear();
+        let read = reader.read_line(&mut line)?;
+        if read == 0 {
+            break;
+        }
+        let trimmed = line.trim_end_matches(['\n', '\r']);
+        if trimmed.trim().is_empty() {
+            continue;
+        }
+        paths.push(PathBuf::from(trimmed.trim()));
+    }
+
+    if paths.is_empty() {
+        return Err(CliError::Message(format!(
+            "{} does not list any input chain files",
+            list_path.display()
+        )));
+    }
+
+    Ok(paths)
 }
 
 /// Tracks the last-emitted serialized record for adjacent deduplication.
