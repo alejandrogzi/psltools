@@ -8,10 +8,10 @@ use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use clap::{Args, ValueEnum};
-use psltools::{OwnedPsl, StreamingReader, write_psl, write_psl_header};
+use psltools::{write_psl, write_psl_header, OwnedPsl, StreamingReader};
 
-use super::sort_core::{SortCriterion, compare_records};
-use super::{CliError, emit_record, ensure_inputs_exist, write_output};
+use super::sort_core::{compare_records, SortCriterion};
+use super::{emit_record, ensure_inputs_exist, write_output, CliError};
 
 const COPY_BUFFER_CAPACITY: usize = 1024 * 1024;
 
@@ -113,11 +113,11 @@ where
         }
         let mut dedup = DedupState::new(args.dedup);
         match args.sorted_by {
-            Some(key) if args.inputs.is_some() => {
+            Some(key) if !inputs.is_empty() => {
                 written += kway_merge(&inputs, key.criterion(), &mut w, &mut dedup)?;
             }
             _ => {
-                if args.inputs.is_none() {
+                if inputs.is_empty() {
                     let mut reader = StreamingReader::new(stdin);
                     written += concat(&mut reader, &mut w, &mut dedup)?;
                 } else {
