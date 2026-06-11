@@ -8,10 +8,10 @@ use std::io::{BufRead, BufReader, Write};
 use std::path::PathBuf;
 
 use clap::{Args, ValueEnum};
-use psltools::{write_psl, write_psl_header, OwnedPsl, StreamingReader};
+use psltools::{OwnedPsl, StreamingReader, write_psl, write_psl_header};
 
-use super::sort_core::{compare_records, SortCriterion};
-use super::{emit_record, ensure_inputs_exist, write_output, CliError};
+use super::sort_core::{SortCriterion, compare_records};
+use super::{CliError, emit_record, ensure_inputs_exist, write_output};
 
 const COPY_BUFFER_CAPACITY: usize = 1024 * 1024;
 
