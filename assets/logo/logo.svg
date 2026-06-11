@@ -1,13 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="200" height="200">
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" role="img">
+  <title id="title">PSLtools Logo</title>
+  <desc id="desc">Minimalistic chain-link design representing sequence alignments for PSLtools</desc>
+
   <!-- Cross connector -->
-  <rect x="65" y="52" width="30" height="16" rx="3" fill="#A86599"/>
-  <rect x="65" y="92" width="30" height="16" rx="3" fill="#6E65A8"/>
+  <rect x="85" y="72" width="30" height="16" rx="3" fill="#A86599"/>
+  <rect x="85" y="112" width="30" height="16" rx="3" fill="#6E65A8"/>
 
-  <!-- Left link -->
-  <rect x="30" y="40" width="40" height="80" rx="6" fill="none" stroke="#A86599" stroke-width="12"/>
-  <rect x="30" y="30" width="40" height="20" rx="4" fill="#A86599"/>
-
-  <!-- Right link -->
-  <rect x="90" y="40" width="40" height="80" rx="6" fill="none" stroke="#6E65A8" stroke-width="12"/>
-  <rect x="90" y="110" width="40" height="20" rx="4" fill="#6E65A8"/>
+  
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#f8f5ff" stroke-width="8"/>
+  
+  <rect x="38" y="48" width="52" height="104" rx="14" ry="14" fill="none" stroke="#C06C84" stroke-width="18" stroke-linejoin="round"/>
+  <rect x="42" y="52" width="44" height="96" rx="12" ry="12" fill="none" stroke="#E8B4C8" stroke-width="6" stroke-linejoin="round"/>
+  
+  <rect x="110" y="48" width="52" height="104" rx="14" ry="14" fill="none" stroke="#5A6A9E" stroke-width="18" stroke-linejoin="round"/>
+  <rect x="114" y="52" width="44" height="96" rx="12" ry="12" fill="none" stroke="#A3B4E0" stroke-width="6" stroke-linejoin="round"/>
+  
+  <circle cx="52" cy="72" r="4.5" fill="#fff"/>
+  <circle cx="52" cy="128" r="4.5" fill="#fff"/>
+  
+  <circle cx="148" cy="72" r="4.5" fill="#fff"/>
+  <circle cx="148" cy="128" r="4.5" fill="#fff"/>
 </svg>
+
