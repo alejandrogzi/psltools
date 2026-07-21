@@ -152,7 +152,7 @@ where
     configure_threads(cli.threads)?;
     configure_logging(resolve_log_level(cli.level))?;
 
-    log::info!("psltools [{}] v{}", &cli.command, env!("CARGO_PKG_VERSION"));
+    log::info!("psltools [{}] v{}", cli.command, env!("CARGO_PKG_VERSION"));
     let start = std::time::Instant::now();
 
     let code = match cli.command {

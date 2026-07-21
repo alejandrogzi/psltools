@@ -1,6 +1,6 @@
 <p align="center">
   <p align="center">
-    <img alt="psltools logo" src="assets/logo/logo.svg" width="200" height="200">
+    <img width=200 align="center" src="./assets/logo/logo.png" >
   </p>
 
   <span>
