@@ -4,6 +4,34 @@ All notable changes to `psltools` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [0.0.4] — 2026-08-20
+
+### Added
+
+- **`dotplot`:** New subcommand renders a reference-vs-query dot plot as SVG
+  (default), PNG (`png` feature), or a TSV segment table (`dot` format).
+  Supports per-sequence axis restriction (`--query`/`--reference`), strand
+  filtering, `--min-block-size`/`--min-alignment-size`, and `--bins` N×N
+  density binning. Multi-sequence inputs are stacked on each axis.
+- **Library:** `query_block_forward` and `reference_block_interval` are now
+  public exports from `ops::region`.
+
+### Changed
+
+- **Dependencies:** bumped `genepred` to 0.0.16; added optional `resvg`
+  (0.45) behind the new `png` feature.
+
+## [0.0.3] — 2026-06-11
+
+Re-published after a forced re-version (the 0.0.3 release had to be unyanked
+from crates.io); no feature changes over 0.0.2.
+
+### Changed
+
+- **Logo:** Replaced the SVG logo with a PNG render and updated the README
+  link accordingly; the `logo.svg` source file was removed.
+- **CLI:** dropped an unnecessary borrow in the startup log line (clippy).
+
 ## [0.0.2] — 2026-06-11
 
 ### Added

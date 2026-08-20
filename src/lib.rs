@@ -43,6 +43,7 @@
 //! - `mmap` (default): memory-map inputs for zero-copy parsing.
 //! - `cli` (default): build the `psltools` binary (implies `parallel`).
 //! - `gzip`: transparently read/write `.gz` PSL.
+//! - `png`: `dotplot --format png` (rasterizes the SVG via `resvg`).
 //! - `parallel`: multi-threaded parsing and parallel record iteration.
 //! - `index`: record-offset and interval indexes.
 //! - `serde`: derive `Serialize`/`Deserialize` on the owned types.
@@ -68,6 +69,7 @@ pub use io::index::{IntervalIndex, PslIndex, PslSpan};
 
 pub use ops::check::{CheckReport, check};
 pub use ops::convert::{to_bed, to_bed12, to_genepred};
+pub use ops::region::{query_block_forward, reference_block_interval};
 pub use ops::score::{ScoreOpts, milli_bad, percent_id, psl_score};
 pub use ops::swap::{swap, swap_with};
 

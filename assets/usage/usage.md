@@ -70,6 +70,7 @@ while let Some(rec) = s.next_record()? {
 | `mmap`      |   ✅    | Memory-map inputs for zero-copy parsing.                       |
 | `cli`       |   ✅    | Build the `psltools` binary (implies `parallel`).              |
 | `gzip`      |         | Transparent `.gz` read/write.                                  |
+| `png`       |         | `dotplot --format png` (rasterize SVG via resvg).              |
 | `parallel`  |   ✅¹   | Multi-threaded parsing and `par_records`.                      |
 | `index`     |         | Record-offset and interval indexes.                            |
 | `serde`     |         | `Serialize`/`Deserialize` on the owned types.                  |
@@ -110,6 +111,7 @@ while let Some(rec) = s.next_record()? {
 | `check`  | Validate structural invariants; non-zero exit on failure.               |
 | `stats`  | Summarize counts, scores, identity histogram, per-reference coverage.    |
 | `convert`| Convert to BED (`--type 3/4/5/6/8/9/12`, default 12) via `genepred`.      |
+| `dotplot`| Reference-vs-query dot plot (`svg` / `png` / `dot` TSV).                 |
 
 See `assets/tools/<command>.md` for per-command flags and examples.
 
