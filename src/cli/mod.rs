@@ -3,6 +3,7 @@
 
 pub mod check;
 pub mod convert;
+pub mod dotplot;
 pub mod filter;
 pub mod merge;
 pub mod score;
@@ -65,6 +66,8 @@ enum Command {
     Check(check::CheckArgs),
     #[command(about = "Convert PSL records to another format (BED12)")]
     Convert(convert::ConvertArgs),
+    #[command(about = "Render a reference-vs-query SVG dot plot")]
+    Dotplot(dotplot::DotplotArgs),
     #[command(about = "Filter PSL records by score, identity, names, region, and more")]
     Filter(filter::FilterArgs),
     #[command(about = "Merge (optionally pre-sorted) PSL files")]
@@ -86,6 +89,7 @@ impl fmt::Display for Command {
         match self {
             Command::Check(_) => f.write_str("check"),
             Command::Convert(_) => f.write_str("convert"),
+            Command::Dotplot(_) => f.write_str("dotplot"),
             Command::Filter(_) => f.write_str("filter"),
             Command::Merge(_) => f.write_str("merge"),
             Command::Score(_) => f.write_str("score"),
@@ -159,6 +163,10 @@ where
         Command::Check(args) => check::run(args, stdin, stdout, stderr)?,
         Command::Convert(args) => {
             convert::run(args, stdin, stdout, stderr)?;
+            0
+        }
+        Command::Dotplot(args) => {
+            dotplot::run(args, stdin, stdout, stderr)?;
             0
         }
         Command::Filter(args) => {
