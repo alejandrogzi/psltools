@@ -304,7 +304,7 @@ fn keep_record<P: PslRecord>(record: &P, filters: &Filters) -> bool {
         return false;
     }
     if filters.min_alignment_size.is_some_and(|min| {
-        (record.query_end() as u64).saturating_sub(record.query_start() as u64) < min
+        coord_u64(record.query_end()).saturating_sub(coord_u64(record.query_start())) < min
     }) {
         return false;
     }
@@ -339,6 +339,12 @@ fn note_size(map: &mut HashMap<Vec<u8>, Coord>, name: &[u8], size: Coord) {
         .or_insert(size);
 }
 
+// `Coord as u64` is a real widening for the default `u32` build.
+#[allow(clippy::unnecessary_cast)]
+fn coord_u64(v: Coord) -> u64 {
+    v as u64
+}
+
 fn collect_sizes<P: PslRecord>(
     record: &P,
     query: &mut HashMap<Vec<u8>, Coord>,
@@ -355,7 +361,7 @@ fn build_axis(sizes: &HashMap<Vec<u8>, Coord>) -> Axis {
     let mut total = 0u64;
     for name in &names {
         offsets.insert(name.clone(), total);
-        total += u64::from(*sizes.get(name).expect("name from sizes"));
+        total += coord_u64(*sizes.get(name).expect("name from sizes"));
     }
     Axis {
         names,
